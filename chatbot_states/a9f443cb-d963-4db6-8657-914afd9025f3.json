@@ -1,0 +1,15 @@
+{
+  "session_id": "a9f443cb-d963-4db6-8657-914afd9025f3",
+  "history": [
+    {
+      "role": "user",
+      "text": "What are kind of crops grown in high temperature areas",
+      "ts": "2025-08-11T09:17:53.664654+00:00"
+    },
+    {
+      "role": "bot",
+      "text": "Crops grown in high temperature areas include tomatoes, peppers, and peppers.",
+      "ts": "2025-08-11T09:18:18.188510+00:00"
+    }
+  ]
+}

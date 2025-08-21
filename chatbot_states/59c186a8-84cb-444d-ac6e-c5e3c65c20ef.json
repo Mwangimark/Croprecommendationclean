@@ -1,0 +1,15 @@
+{
+  "session_id": "59c186a8-84cb-444d-ac6e-c5e3c65c20ef",
+  "history": [
+    {
+      "role": "user",
+      "text": "where is maize usually  grown from",
+      "ts": "2025-08-11T09:03:16.167417+00:00"
+    },
+    {
+      "role": "bot",
+      "text": "Grasslands",
+      "ts": "2025-08-11T09:05:08.506628+00:00"
+    }
+  ]
+}

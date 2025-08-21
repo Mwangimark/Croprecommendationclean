@@ -1,0 +1,15 @@
+{
+  "session_id": "e280a6c2-a894-4dd3-82e2-2213354a90e6",
+  "history": [
+    {
+      "role": "user",
+      "text": "What are conditions for growth of bananas?",
+      "ts": "2025-08-11T09:19:00.913553+00:00"
+    },
+    {
+      "role": "bot",
+      "text": "Bananas grow best in warm, moist, well-draining soils.",
+      "ts": "2025-08-11T09:19:22.243231+00:00"
+    }
+  ]
+}

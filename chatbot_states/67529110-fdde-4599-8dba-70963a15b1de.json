@@ -1,0 +1,15 @@
+{
+  "session_id": "67529110-fdde-4599-8dba-70963a15b1de",
+  "history": [
+    {
+      "role": "user",
+      "text": "how do i measure moisture content of soil?",
+      "ts": "2025-08-11T09:14:41.936294+00:00"
+    },
+    {
+      "role": "bot",
+      "text": "Use a soil moisture meter to measure soil moisture.",
+      "ts": "2025-08-11T09:16:00.698713+00:00"
+    }
+  ]
+}
