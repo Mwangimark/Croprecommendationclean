@@ -55,7 +55,7 @@ multidict==6.6.3
 mypy_extensions==1.1.0
 mysqlclient==2.2.7
 networkx==3.4.2
-numpy>=1.26.4
+numpy==1.26.4
 nvidia-cublas-cu12==12.8.4.1
 nvidia-cuda-cupti-cu12==12.8.90
 nvidia-cuda-nvrtc-cu12==12.8.93
