@@ -29,7 +29,12 @@ SECRET_KEY = 'django-insecure-t9*lw+rp@b@s4a$k#k=zek&mpn62%racbww5k9n411d1(efr2a
 # SECURITY WARNING: don't run with debug turned on in production!
 
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "crop-recommendation-4urg.onrender.com",  # your Render domain
+]
 
 
 # Application definition

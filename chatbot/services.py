@@ -1,7 +1,7 @@
 import os
-import json
+# import json
 from pathlib import Path
-from typing import Dict, Any, TypedDict
+# from typing import Dict, Any, TypedDict
 # from dotenv import load_dotenv
 # from transformers import pipeline
 # from langchain.prompts import PromptTemplate
@@ -11,7 +11,6 @@ from typing import Dict, Any, TypedDict
 from django.conf import settings
 from .models import ConversationState
 import openai
-import os
 
 # load_dotenv() 
 
@@ -66,23 +65,23 @@ FAQ = {
 
 
 # --------- State Helpers ----------
-def _state_file_path(session_id: str) -> Path:
-    return STATE_DIR / f"{session_id}.json"
+# def _state_file_path(session_id: str) -> Path:
+#     return STATE_DIR / f"{session_id}.json"
 
-def write_state_file(session_id: str, state_obj: Dict[str, Any]):
-    with open(_state_file_path(session_id), "w", encoding="utf-8") as f:
-        json.dump(state_obj, f, indent=2, ensure_ascii=False)
+# def write_state_file(session_id: str, state_obj: Dict[str, Any]):
+#     with open(_state_file_path(session_id), "w", encoding="utf-8") as f:
+#         json.dump(state_obj, f, indent=2, ensure_ascii=False)
 
-def load_or_create_state(session_id: str, user=None) -> ConversationState:
-    cs, created = ConversationState.objects.get_or_create(session_id=session_id, defaults={"user": user})
-    if created:
-        cs.history = []
-        cs.save()
-        write_state_file(session_id, {"session_id": session_id, "history": cs.history})
-    return cs
+# def load_or_create_state(session_id: str, user=None) -> ConversationState:
+#     cs, created = ConversationState.objects.get_or_create(session_id=session_id, defaults={"user": user})
+#     if created:
+#         cs.history = []
+#         cs.save()
+#         write_state_file(session_id, {"session_id": session_id, "history": cs.history})
+#     return cs
 
 
-# --------- Rule-based Response ----------
+# # --------- Rule-based Response ----------
 def get_rule_reply(user_message: str) -> str:
     message_lower = user_message.lower()
     for q, a in FAQ.items():
@@ -145,7 +144,7 @@ def get_rule_reply(user_message: str) -> str:
 #     cs.append("bot", gpt_answer)
 #     cs.save()
 #     write_state_file(session_id, {"session_id": session_id, "history": cs.history})
-    return {"reply": gpt_answer}
+    # return {"reply": gpt_answer}
 
 
 
