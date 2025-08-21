@@ -2,26 +2,32 @@
 
 import os
 import joblib
+from threading import Lock
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, 'your_model.pkl')
 
-_model = None  # private variable
+# Thread-safe lazy loader
+_model = None
+_model_lock = Lock()
 
 def get_model():
     global _model
     if _model is None:
-        try:
-            _model = joblib.load(MODEL_PATH)
-        except Exception as e:
-            print(f"🔴 Error loading model: {e}")
-            _model = None
+        with _model_lock:
+            if _model is None:  # double-checked locking
+                try:
+                    _model = joblib.load(MODEL_PATH)
+                    print("✅ Model loaded successfully")
+                except Exception as e:
+                    _model = None
+                    print(f"🔴 Error loading model: {e}")
     return _model
 
 def predict_crops(data):
     """
     Takes a dictionary of input values and returns the top 3 predicted crops.
-    Expected keys in `data`: nitrogen, phosphorus, potassium, pH, rainfall, temperature, humidity
+    Expected keys: nitrogen, phosphorus, potassium, pH, rainfall, temperature, humidity
     """
     model = get_model()
     if model is None:
