@@ -11,7 +11,7 @@ class ChatbotAPIView(APIView):
     POST /api/chatbot/  payload: { "message": "...", "session_id": "optional" }
     Returns: { "reply": "...", "session_id": "..." }
     """
-    permission_classes = [IsAuthenticated]  # add authentication if needed
+    permission_classes = [IsAuthenticated] 
 
     def post(self, request):
         payload = request.data

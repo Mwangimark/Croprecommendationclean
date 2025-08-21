@@ -2,18 +2,18 @@ import os
 import json
 from pathlib import Path
 from typing import Dict, Any, TypedDict
-from dotenv import load_dotenv
-from transformers import pipeline
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-from langchain_community.llms import HuggingFacePipeline
-from langgraph.graph import StateGraph, END
+# from dotenv import load_dotenv
+# from transformers import pipeline
+# from langchain.prompts import PromptTemplate
+# from langchain.chains import LLMChain
+# from langchain_community.llms import HuggingFacePipeline
+# from langgraph.graph import StateGraph, END
 from django.conf import settings
 from .models import ConversationState
 import openai
 import os
 
-load_dotenv() 
+# load_dotenv() 
 
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -92,59 +92,59 @@ def get_rule_reply(user_message: str) -> str:
 
 
 # --------- Hugging Face Response ----------
-def get_gpt_reply(user_message: str, max_tokens: int = 100) -> str:
-    system_message = """
-    You are an agricultural expert. Provide clear, practical, and somewhat detailed answers about farming and crops.
+# def get_gpt_reply(user_message: str, max_tokens: int = 100) -> str:
+#     system_message = """
+#     You are an agricultural expert. Provide clear, practical, and somewhat detailed answers about farming and crops.
 
-    Example:
-    Q: Which crops grow best in acidic soil?
-    A: Crops like potatoes, blueberries, sweet potatoes, and peanuts thrive in acidic soils (pH < 6.0). For each crop, briefly explain the reason and ideal pH range if known.
+#     Example:
+#     Q: Which crops grow best in acidic soil?
+#     A: Crops like potatoes, blueberries, sweet potatoes, and peanuts thrive in acidic soils (pH < 6.0). For each crop, briefly explain the reason and ideal pH range if known.
 
-    IMPORTANT: Only answer questions related to agriculture, farming, crops, soil, climate, or related topics. 
-    If the question is unrelated to agriculture, politely respond: "I'm here to assist with agriculture-related questions. Could you please ask something about farming or crops?"
-    """
+#     IMPORTANT: Only answer questions related to agriculture, farming, crops, soil, climate, or related topics. 
+#     If the question is unrelated to agriculture, politely respond: "I'm here to assist with agriculture-related questions. Could you please ask something about farming or crops?"
+#     """
 
-    try:
-        chat_completion = openai.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": user_message}
-            ],
-            max_tokens=max_tokens,
-            temperature=0.7,
-        )
-        answer = chat_completion.choices[0].message.content.strip()
-        return answer
-    except Exception as e:
-        return f"Sorry, I couldn't process your request due to: {str(e)}"
+#     try:
+#         chat_completion = openai.chat.completions.create(
+#             model="gpt-4o-mini",
+#             messages=[
+#                 {"role": "system", "content": system_message},
+#                 {"role": "user", "content": user_message}
+#             ],
+#             max_tokens=max_tokens,
+#             temperature=0.7,
+#         )
+#         answer = chat_completion.choices[0].message.content.strip()
+#         return answer
+#     except Exception as e:
+#         return f"Sorry, I couldn't process your request due to: {str(e)}"
 
 
 
 # --------- LangGraph Node ----------
-def chat_node(state):
-    session_id = state.get("session_id")
-    user_message = state.get("user_message", "").strip()
-    user = state.get("user", None)
+# def chat_node(state):
+#     session_id = state.get("session_id")
+#     user_message = state.get("user_message", "").strip()
+#     user = state.get("user", None)
 
-    cs = load_or_create_state(session_id, user)
-    cs.append("user", user_message)
-    cs.save()
-    write_state_file(session_id, {"session_id": session_id, "history": cs.history})
+#     cs = load_or_create_state(session_id, user)
+#     cs.append("user", user_message)
+#     cs.save()
+#     write_state_file(session_id, {"session_id": session_id, "history": cs.history})
 
-    # Try rule-based first
-    rule_reply = get_rule_reply(user_message)
-    if rule_reply:
-        cs.append("bot", rule_reply)
-        cs.save()
-        write_state_file(session_id, {"session_id": session_id, "history": cs.history})
-        return {"reply": rule_reply}
+#     # Try rule-based first
+#     rule_reply = get_rule_reply(user_message)
+#     if rule_reply:
+#         cs.append("bot", rule_reply)
+#         cs.save()
+#         write_state_file(session_id, {"session_id": session_id, "history": cs.history})
+#         return {"reply": rule_reply}
 
-    # Fallback to GPT model
-    gpt_answer = get_gpt_reply(user_message)
-    cs.append("bot", gpt_answer)
-    cs.save()
-    write_state_file(session_id, {"session_id": session_id, "history": cs.history})
+#     # Fallback to GPT model
+#     gpt_answer = get_gpt_reply(user_message)
+#     cs.append("bot", gpt_answer)
+#     cs.save()
+#     write_state_file(session_id, {"session_id": session_id, "history": cs.history})
     return {"reply": gpt_answer}
 
 
@@ -153,28 +153,43 @@ def chat_node(state):
 
 
 # Define the shape of the state
-class ChatState(TypedDict):
-    session_id: str
-    user_message: str
-    user: str | None
-    reply: str | None
+# class ChatState(TypedDict):
+#     session_id: str
+#     user_message: str
+#     user: str | None
+#     reply: str | None
 
 # Build graph with state schema
-graph = StateGraph(ChatState)
-graph.add_node("chat", chat_node)
-graph.set_entry_point("chat")
-graph.add_edge("chat", END)
-compiled_graph = graph.compile()
+# graph = StateGraph(ChatState)
+# graph.add_node("chat", chat_node)
+# graph.set_entry_point("chat")
+# graph.add_edge("chat", END)
+# compiled_graph = graph.compile()
 
 
 
 # --------- Public API for Views ----------
 def handle_message(session_id: str, user_message: str, user=None) -> str:
+    # State dict
     state = {"session_id": session_id, "user_message": user_message, "user": user}
-    result = compiled_graph.invoke(state)  # <-- FIXED
-    reply = result.get("reply") if isinstance(result, dict) else None
-    if not reply:
-        reply = "Sorry, I couldn't understand that. Please try again."
-    return reply
 
+    # Rule-based first
+    rule_reply = get_rule_reply(user_message)
+    if rule_reply:
+        return rule_reply
 
+    # GPT fallback
+    try:
+        chat_completion = openai.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are an agricultural expert."},
+                {"role": "user", "content": user_message}
+            ],
+            max_tokens=150,
+            temperature=0.7
+        )
+        gpt_answer = chat_completion.choices[0].message.content.strip()
+        return gpt_answer
+    except Exception as e:
+        return f"Sorry, I couldn't process your request due to: {str(e)}"
