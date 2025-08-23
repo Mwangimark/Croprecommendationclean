@@ -5,13 +5,15 @@ import uuid
 from .services import handle_message
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
+from subscriptions.permissions import HasActiveSubscription
+
 
 class ChatbotAPIView(APIView):
     """
     POST /api/chatbot/  payload: { "message": "...", "session_id": "optional" }
     Returns: { "reply": "...", "session_id": "..." }
     """
-    permission_classes = [IsAuthenticated] 
+    permission_classes = [IsAuthenticated,HasActiveSubscription] 
 
     def post(self, request):
         payload = request.data

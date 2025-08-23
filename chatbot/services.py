@@ -2,7 +2,7 @@ import os
 # import json
 from pathlib import Path
 # from typing import Dict, Any, TypedDict
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 # from transformers import pipeline
 # from langchain.prompts import PromptTemplate
 # from langchain.chains import LLMChain
@@ -12,10 +12,11 @@ from django.conf import settings
 from .models import ConversationState
 import openai
 
-# load_dotenv() 
+load_dotenv() 
 
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
   # Debugging line to check if key is loaded
 # # --------- Configuration ----------
 # MODEL_NAME = os.getenv("HF_MODEL", "google/flan-t5-large")  # default local model

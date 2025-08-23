@@ -28,13 +28,14 @@ SECRET_KEY = 'django-insecure-t9*lw+rp@b@s4a$k#k=zek&mpn62%racbww5k9n411d1(efr2a
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
+ALLOWED_HOSTS = ["*"]
 
 
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-    "crop-recommendation-4urg.onrender.com",  # your Render domain
-]
+# ALLOWED_HOSTS = [
+#     "127.0.0.1",
+#     "localhost",
+#     "https://crop-recommendation-4urg.onrender.com/",
+# ]
 
 
 # Application definition
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     'recommendationcrop',
     'users',
     'chatbot',
+    'subscriptions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -205,4 +207,26 @@ CORS_ALLOW_HEADERS = [
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# mpesa
+MPESA_CONSUMER_KEY = config("MPESA_CONSUMER_KEY")
+MPESA_CONSUMER_SECRET = config("MPESA_CONSUMER_SECRET")
+MPESA_SHORTCODE = config("MPESA_SHORTCODE")
+MPESA_PASSKEY = config("MPESA_PASSKEY")
+MPESA_BASE_URL = config("MPESA_BASE_URL", default="https://sandbox.safaricom.co.ke")
+MPESA_CALLBACK_URL = config("MPESA_CALLBACK_URL")
+
+import os
+MPESA_ENV = config("MPESA_ENV", "sandbox")
+MPESA_CONSUMER_KEY = config("MPESA_CONSUMER_KEY", "")
+MPESA_CONSUMER_SECRET = config("MPESA_CONSUMER_SECRET", "")
+MPESA_SHORTCODE = config("MPESA_SHORTCODE", "")
+MPESA_PASSKEY = config("MPESA_PASSKEY", "")
+MPESA_CALLBACK_URL = config("MPESA_CALLBACK_URL", "")
+
+SUBSCRIPTION_PRICE = int(config("SUBSCRIPTION_PRICE", "100"))
+SUBSCRIPTION_DAYS = int(config("SUBSCRIPTION_DAYS", "30"))
+
+MPESA_BASE = "https://sandbox.safaricom.co.ke" if MPESA_ENV == "sandbox" else "https://api.safaricom.co.ke"
+
 
