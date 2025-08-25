@@ -24,6 +24,7 @@ class SubscribeView(APIView):
             phone=phone,
         )
         try:
+
             resp = initiate_stk_push(amount=amount, phone=phone, account_ref=f"SUB-{request.user.id}")
             pt.merchant_request_id = resp.get("MerchantRequestID")
             pt.checkout_request_id = resp.get("CheckoutRequestID")

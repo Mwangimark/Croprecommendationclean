@@ -191,6 +191,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://cropfrontend.vercel.app",
 ]
 
 CORS_ALLOW_HEADERS = [
