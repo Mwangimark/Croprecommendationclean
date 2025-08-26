@@ -215,7 +215,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 if not DEBUG:  # Production
-    INSTALLED_APPS += ["cloudinary", "cloudinary_storage"]
 
     CLOUDINARY_STORAGE = {
         "CLOUD_NAME": config("CLOUD_NAME"),
