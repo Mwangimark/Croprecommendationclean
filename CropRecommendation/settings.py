@@ -15,6 +15,9 @@ from datetime import timedelta
 from decouple import config
 from corsheaders.defaults import default_headers
 import os
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -206,8 +209,22 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
+
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+if not DEBUG:  # Production
+    INSTALLED_APPS += ["cloudinary", "cloudinary_storage"]
+
+    CLOUDINARY_STORAGE = {
+        "CLOUD_NAME": config("CLOUD_NAME"),
+        "API_KEY": config("CLOUD_API_KEY"),
+        "API_SECRET": config("CLOUD_API_SECRET"),
+    }
+
+    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
 
 # mpesa
 MPESA_CONSUMER_KEY = config("MPESA_CONSUMER_KEY")
@@ -229,5 +246,6 @@ SUBSCRIPTION_PRICE = int(config("SUBSCRIPTION_PRICE", "100"))
 SUBSCRIPTION_DAYS = int(config("SUBSCRIPTION_DAYS", "30"))
 
 MPESA_BASE = "https://sandbox.safaricom.co.ke" if MPESA_ENV == "sandbox" else "https://api.safaricom.co.ke"
+
 
 

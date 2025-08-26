@@ -34,9 +34,9 @@ class Crop(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if self.image_url and not self.image:
+        if self.image_url:  # always check if an image_url is given
             try:
-                response = requests.get(self.image_url)
+                response = requests.get(self.image_url, timeout=10)
                 if response.status_code == 200:
                     url_path = urlparse(self.image_url).path
                     ext = os.path.splitext(url_path)[-1] or '.jpg'
@@ -45,7 +45,9 @@ class Crop(models.Model):
                     self.image.save(file_name, File(image_file), save=False)
             except Exception as e:
                 print(f"❌ Failed to fetch image from URL: {e}")
+
         super().save(*args, **kwargs)
+
 
 
 # nutrients model
@@ -59,17 +61,17 @@ class Nutrients(models.Model):
     photo = models.ImageField(upload_to='nutrients/', blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        # If image_url is given but no local photo yet, download it
-        if self.image_url and not self.photo:
+        if self.image_url:  # always check if an image_url is given
             try:
                 response = requests.get(self.image_url, timeout=10)
                 if response.status_code == 200:
                     filename = f"{slugify(self.name)}.jpg"
                     self.photo.save(filename, ContentFile(response.content), save=False)
             except Exception as e:
-                print(f"Image download failed: {e}")
+                print(f"❌ Image download failed: {e}")
 
         super().save(*args, **kwargs)
+
 
     def __str__(self):
         return self.name
