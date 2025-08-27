@@ -103,6 +103,14 @@ print(ENVIRONMENT)
 
 if ENVIRONMENT == "production":
     DEBUG = False
+    CLOUDINARY_STORAGE = {
+        "CLOUD_NAME": config("CLOUD_NAME"),
+        "API_KEY": config("CLOUD_API_KEY"),
+        "API_SECRET": config("CLOUD_API_SECRET"),
+    }
+
+    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -125,6 +133,9 @@ else:
             'PORT': config('DB_PORT'),
         }
     }
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 
 
@@ -210,19 +221,6 @@ CORS_ALLOW_HEADERS = [
 ]
 
 
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-if not DEBUG:  # Production
-
-    CLOUDINARY_STORAGE = {
-        "CLOUD_NAME": config("CLOUD_NAME"),
-        "API_KEY": config("CLOUD_API_KEY"),
-        "API_SECRET": config("CLOUD_API_SECRET"),
-    }
-
-    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 
 # mpesa
