@@ -3,14 +3,14 @@ from .models import Crop,Nutrients
 
 
 class CropSerializer(serializers.ModelSerializer):
-    image_url = serializers.SerializerMethodField()
+    image_path = serializers.SerializerMethodField()
 
     class Meta:
         model = Crop
         fields = '__all__'  # Keeps all fields from Crop model
-        extra_fields = ['image_url']  # For clarity, not required
+        extra_fields = ['image_path']  # For clarity, not required
 
-    def get_image_url(self, obj):
+    def get_image_path(self, obj):
         request = self.context.get('request')
         if obj.image and hasattr(obj.image, 'url'):
             return request.build_absolute_uri(obj.image.url) if request else obj.image.url
