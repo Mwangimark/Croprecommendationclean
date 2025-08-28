@@ -28,7 +28,9 @@ class RecommendationSerializer(serializers.ModelSerializer):
                 "name": crop.crop.name,
                 "confidence": round(crop.confidence, 2),
                 "description": crop.crop.description,
-                "image": request.build_absolute_uri(crop.crop.image.url) if crop.crop.image_url else None,
+                "image": request.build_absolute_uri(crop.crop.image.url) if crop.crop.image else None,
+                "image_url":crop.crop.image_url
+                
                 
             }
             for crop in crops
