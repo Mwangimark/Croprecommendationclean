@@ -20,7 +20,7 @@ class RecommendationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_predicted_crops(self, obj):
-        request = self.context.get('request')
+        request = self.context.get('request')  # for building absolute image URLs
         crops = RecommendationCrop.objects.filter(recommendation=obj)
 
         return [
@@ -28,10 +28,9 @@ class RecommendationSerializer(serializers.ModelSerializer):
                 "name": crop.crop.name,
                 "confidence": round(crop.confidence, 2),
                 "description": crop.crop.description,
-                # Prefer uploaded image if exists, otherwise fallback to image_url
-                "image": request.build_absolute_uri(crop.crop.image.url) if crop.crop.image else crop.crop.image_url
+                "image": request.build_absolute_uri(crop.crop.image.url) if crop.crop.image_url else None,
+                
             }
             for crop in crops
         ]
-
 
