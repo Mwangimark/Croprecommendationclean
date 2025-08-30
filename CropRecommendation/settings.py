@@ -15,6 +15,9 @@ from datetime import timedelta
 from decouple import config
 from corsheaders.defaults import default_headers
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -243,6 +246,15 @@ SUBSCRIPTION_PRICE = int(config("SUBSCRIPTION_PRICE", "100"))
 SUBSCRIPTION_DAYS = int(config("SUBSCRIPTION_DAYS", "30"))
 
 MPESA_BASE = "https://sandbox.safaricom.co.ke" if MPESA_ENV == "sandbox" else "https://api.safaricom.co.ke"
+
+# email
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))  # 👈 cast to int
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 

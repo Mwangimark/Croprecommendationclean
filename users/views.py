@@ -30,7 +30,30 @@ class UserViewSet(viewsets.ModelViewSet):
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
-    
+
+    def create(self, request, *args, **kwargs):
+        """
+        Override create to send verification email after user signup
+        """
+        response = super().create(request, *args, **kwargs)
+
+        # Get the newly created user from DB
+        user = User.objects.get(id=response.data["id"])
+
+        from django.conf import settings
+
+        # Ensure they start unverified
+        user.is_verified = False
+        user.is_active=False
+        user.save()
+
+        
+
+        # Import and send the email
+        from .utils import send_verification_email
+        send_verification_email(user, request)
+
+        return response
 
     def destroy(self, request, *args, **kwargs):
         """
@@ -39,9 +62,9 @@ class UserViewSet(viewsets.ModelViewSet):
         user = self.get_object()
         user.is_deleted = True
         user.save()
-        return Response({'message':'User deleted successfuly'},status=status.HTTP_204_NO_CONTENT)
-    
-    @action(detail =True, methods = ['post'],url_path = 'change-password')
+        return Response({'message':'User deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post'], url_path='change-password')
     def change_password(self, request, pk=None):
         user = self.get_object()
         serializer = ChangePasswordSerializer(data=request.data)
@@ -58,17 +81,17 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'status': 'Password updated successfully'}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-        # confirming_authentication
+
+    # confirming_authentication
     def get_permissions(self):
-          if self.action in ['create']:
-                return [AllowAny()]
-          elif self.action == 'list':
-                return [IsAuthenticated(),IsAdmin()]
-          elif self.action in ['retrieve','update','partial_update','destroy','change_password']:
-                return[IsAuthenticated()]
-          return [IsAuthenticated( )]
-    
+        if self.action in ['create']:
+            return [AllowAny()]
+        elif self.action == 'list':
+            return [IsAuthenticated(), IsAdmin()]
+        elif self.action in ['retrieve','update','partial_update','destroy','change_password']:
+            return [IsAuthenticated()]
+        return [IsAuthenticated()]
+ 
 
 
 @api_view(['GET'])
@@ -81,6 +104,7 @@ def verify_email(request,uidb64,token):
         
     if email_verification_token.check_token(user,token):
             user.is_verified = True
+            user.is_active = True
             user.save()
             return HttpResponse('Email successfully verified!',status= 200)
         
@@ -131,3 +155,5 @@ class ContactUs(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# users dealing with forgot make_password
+# system sends an otp to the email

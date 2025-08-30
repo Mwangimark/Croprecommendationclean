@@ -18,10 +18,10 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        validated_data['password'] = make_password(validated_data['password'])
-        user = super().create(validated_data)
-        send_verification_email(user, self.context['request'])
+        user = User.objects.create_user(**validated_data)
+        # send_verification_email(user, self.context['request'])  # user first, request second
         return user
+
 
     def update(self, instance, validated_data):
         # Prevent rehashing password if not provided
