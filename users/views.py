@@ -26,6 +26,8 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from datetime import timedelta
 from .models import PasswordResetOTP, User
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 
 
@@ -192,14 +194,17 @@ class SendOtp(APIView):
             expires_at=expires_at
         )
 
+        html_content = render_to_string('emails/otpreceive.html',{'otp':otp,"user":user})
+
         # send email
-        send_mail(
-            "Your Password Reset OTP",
-            f"Use this OTP to reset your password: {otp}. It expires in 10 minutes.",
-            settings.DEFAULT_FROM_EMAIL,
-            [email],
-            fail_silently=False,
+        email_message = EmailMultiAlternatives(
+            subject="Your Password Reset OTP",
+            body=f"Use this OTP to reset your password: {otp}",  # fallback plain text
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[email]
         )
+        email_message.attach_alternative(html_content, "text/html")
+        email_message.send(fail_silently=False)
 
         return Response({"message": "OTP sent to your email"}, status=status.HTTP_200_OK)
 
@@ -232,7 +237,6 @@ class VerifyOtp(APIView):
             return Response({"error": "User not found"}, status=404)
 
 # views.py
-from django.contrib.auth.hashers import make_password
 
 class ResetPassword(APIView):
     
@@ -257,6 +261,23 @@ class ResetPassword(APIView):
 
             # Invalidate OTP
             otp_obj.delete()
+            context = {
+                    "user": user,
+                    "login_url": settings.FRONTEND_LOGIN_URL,  # replace with your actual frontend login URL
+                    "current_year": timezone.now().year,
+                }
+
+            html_content = render_to_string('emails/passwordchanged.html',context)
+
+            # send email
+            email_message = EmailMultiAlternatives(
+                subject="Your Password Reset OTP",
+                body=f"Your password has been successfully changed",  # fallback plain text
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[email]
+            )
+            email_message.attach_alternative(html_content, "text/html")
+            email_message.send(fail_silently=False)
 
             return Response({"message": "Password reset successfully. You can now login."}, status=200)
 

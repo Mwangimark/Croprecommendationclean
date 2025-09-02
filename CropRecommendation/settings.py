@@ -257,4 +257,8 @@ EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
+FRONTEND_LOGIN_URL = "http://localhost:3000/auth" 
+
+import os
+FRONTEND_LOGIN_URL = os.getenv("FRONTEND_LOGIN_URL", FRONTEND_LOGIN_URL)
 
