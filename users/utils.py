@@ -6,6 +6,8 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from httplib2 import Response
+
 
 class EmailVerificationTokenGenerator(PasswordResetTokenGenerator):
     def _make_hash_value(self, user,timestamp):
@@ -38,3 +40,4 @@ def send_verification_email(user, request):
 
         
 email_verification_token = EmailVerificationTokenGenerator()
+

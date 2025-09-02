@@ -1,4 +1,5 @@
 # users/views.py
+from django.conf import settings
 from rest_framework.decorators import action
 from rest_framework import viewsets
 from .models import User
@@ -20,6 +21,12 @@ from oauth2client.service_account import ServiceAccountCredentials
 from rest_framework.views import APIView
 import json
 import os
+import random, string
+from django.core.mail import send_mail
+from django.utils import timezone
+from datetime import timedelta
+from .models import PasswordResetOTP, User
+
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -157,3 +164,101 @@ class ContactUs(APIView):
 
 # users dealing with forgot make_password
 # system sends an otp to the email
+# views.py
+
+class SendOtp(APIView):
+    permission_classes = [AllowAny] 
+
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "User with this email does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # generate OTP
+        otp = str(random.randint(100000, 999999))
+
+        # set expiry (10 mins from now)
+        expires_at = timezone.now() + timedelta(minutes=10)
+
+        # store in DB
+        PasswordResetOTP.objects.create(
+            user=user,
+            otp=otp,
+            expires_at=expires_at
+        )
+
+        # send email
+        send_mail(
+            "Your Password Reset OTP",
+            f"Use this OTP to reset your password: {otp}. It expires in 10 minutes.",
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+            fail_silently=False,
+        )
+
+        return Response({"message": "OTP sent to your email"}, status=status.HTTP_200_OK)
+
+
+
+# verify otp
+# views.py
+class VerifyOtp(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        otp = request.data.get("otp")
+
+        try:
+            user = User.objects.get(email=email)
+            otp_obj = PasswordResetOTP.objects.filter(user=user, otp=otp).last()
+
+            if not otp_obj:
+                return Response({"error": "Invalid OTP"}, status=400)
+
+            if otp_obj.expires_at < timezone.now():
+                return Response({"error": "OTP expired"}, status=400)
+
+            # ✅ Instead of deleting, mark as verified
+            otp_obj.is_verified = True
+            otp_obj.save()
+
+            return Response({"message": "OTP verified successfully, proceed to set new password"})
+
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)
+
+# views.py
+from django.contrib.auth.hashers import make_password
+
+class ResetPassword(APIView):
+    
+    def post(self, request):
+        email = request.data.get("email")
+        new_password = request.data.get("new_password")
+        confirm_password = request.data.get("confirm_password")
+
+        if new_password != confirm_password:
+            return Response({"error": "Passwords do not match"}, status=400)
+
+        try:
+            user = User.objects.get(email=email)
+            otp_obj = PasswordResetOTP.objects.filter(user=user, is_verified=True).last()
+
+            if not otp_obj:
+                return Response({"error": "OTP not verified"}, status=400)
+
+            # ✅ Update password properly
+            user.set_password(new_password)
+            user.save()
+
+            # Invalidate OTP
+            otp_obj.delete()
+
+            return Response({"message": "Password reset successfully. You can now login."}, status=200)
+
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)
