@@ -261,4 +261,3 @@ FRONTEND_LOGIN_URL = "http://localhost:3000/auth"
 
 import os
 FRONTEND_LOGIN_URL = os.getenv("FRONTEND_LOGIN_URL", FRONTEND_LOGIN_URL)
-
