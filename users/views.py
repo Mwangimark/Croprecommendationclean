@@ -28,6 +28,7 @@ from datetime import timedelta
 from .models import PasswordResetOTP, User
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+import threading 
 
 
 
