@@ -206,10 +206,19 @@ SIMPLE_JWT = {
 
 CORS_ALLOW_CREDENTIALS = True
 
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://cropfrontend.vercel.app",
+    "http://127.0.0.1:3000",
+    "https://cropfrontend.vercel.app",   # if you ever use the clean domain
+    "https://cropfrontend-pxsqi9q3b-mwangis-projects-cfa03072.vercel.app",  # your actual vercel project
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://cropfrontend.vercel.app",
+    "https://cropfrontend-pxsqi9q3b-mwangis-projects-cfa03072.vercel.app",
+]
+
 
 CORS_ALLOW_HEADERS = [
     "accept",
