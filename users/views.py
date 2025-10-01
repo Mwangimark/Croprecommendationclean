@@ -169,7 +169,7 @@ class ContactUs(APIView):
 # views.py
 
 class SendOtp(APIView):
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
 
     def post(self, request):
         email = request.data.get("email")
@@ -183,28 +183,23 @@ class SendOtp(APIView):
 
         # generate OTP
         otp = str(random.randint(100000, 999999))
-
-        # set expiry (10 mins from now)
         expires_at = timezone.now() + timedelta(minutes=10)
 
         # store in DB
-        PasswordResetOTP.objects.create(
-            user=user,
-            otp=otp,
-            expires_at=expires_at
-        )
+        PasswordResetOTP.objects.create(user=user, otp=otp, expires_at=expires_at)
 
-        html_content = render_to_string('emails/otpreceive.html',{'otp':otp,"user":user})
-
-        # send email
+        # prepare email
+        html_content = render_to_string('emails/otpreceive.html', {'otp': otp, "user": user})
         email_message = EmailMultiAlternatives(
             subject="Your Password Reset OTP",
-            body=f"Use this OTP to reset your password: {otp}",  # fallback plain text
+            body=f"Use this OTP to reset your password: {otp}",
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[email]
         )
         email_message.attach_alternative(html_content, "text/html")
-        email_message.send(fail_silently=False)
+
+        # send in background thread
+        threading.Thread(target=lambda: email_message.send(fail_silently=True)).start()
 
         return Response({"message": "OTP sent to your email"}, status=status.HTTP_200_OK)
 
