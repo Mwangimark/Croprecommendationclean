@@ -169,7 +169,7 @@ def get_rule_reply(user_message: str) -> str:
 
 
 # --------- Public API for Views ----------
-def handle_message(session_id: str, user_message: str, user=None) -> str:
+def handl_message(session_id: str, user_message: str, user=None) -> str:
     # State dict
     state = {"session_id": session_id, "user_message": user_message, "user": user}
 
@@ -193,3 +193,114 @@ def handle_message(session_id: str, user_message: str, user=None) -> str:
         return gpt_answer
     except Exception as e:
         return f"Sorry, I couldn't process your request due to: {str(e)}"
+
+# hugging face fallback
+# service.py
+# import os
+# from huggingface_hub import InferenceClient
+
+# # Initialize the client with your Hugging Face API key
+# HF_API_KEY = os.getenv("HUGGINGFACE_API_KEY")  # store key in .env
+# client = InferenceClient(api_key=HF_API_KEY)
+
+# def handle_message(session_id: str, user_message: str, user=None) -> str:
+#     """
+#     Handle user message with Hugging Face model.
+#     Replies in same language (English or Kiswahili).
+#     """
+
+#     try:
+#         response = client.chat.completions.create(
+#             model="mistralai/Mistral-7B-Instruct-v0.2",  # you can swap for another
+#             messages=[
+#                 {
+#                     "role": "system",
+#                     "content": (
+#                         "You are an agriculture assistant. "
+#                         "Reply in the same language the user uses (English or Kiswahili). "
+#                         "If user greets (like 'habari' or 'hello'), respond naturally and briefly. "
+#                         "If user asks an agriculture question, give short, clear, practical answers "
+#                         "(2–3 sentences max)."
+#                     )
+#                 },
+#                 {"role": "user", "content": user_message}
+#             ],
+#             max_tokens=250,
+#         )
+
+#         reply = response.choices[0].message["content"].strip()
+#         return reply
+
+#     except Exception as e:
+#         raise Exception(f"Hugging Face error: {str(e)}")
+
+# service.py
+import os
+import re
+from huggingface_hub import InferenceClient
+
+HF_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
+client = InferenceClient(api_key=HF_API_KEY)
+
+PRIMARY_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
+FALLBACK_MODEL = "google/mt5-small"  # multilingual model, better Kiswahili handling
+
+def is_mixed_language(user_message: str, reply: str) -> bool:
+    """
+    Detect if reply mixes English + Kiswahili.
+    Simple check: if user wrote in Kiswahili but reply has too many English words.
+    """
+    # detect Kiswahili question (basic heuristic: swahili words like 'ya', 'ni', 'mazao')
+    swahili_keywords = ["mazao", "mbegu", "udongo", "mvua", "kilimo", "mmea", "za", "ni"]
+    asked_in_swahili = any(word in user_message.lower() for word in swahili_keywords)
+
+    if asked_in_swahili:
+        # if more than 30% of words in reply are English letters-only, assume it's broken
+        words = reply.split()
+        english_like = [w for w in words if re.match(r"^[a-zA-Z]+$", w)]
+        if len(english_like) / max(len(words), 1) > 0.3:
+            return True
+    return False
+
+def ask_model(model: str, system_prompt: str, user_message: str, max_tokens: int = 250) -> str:
+    """Helper to query Hugging Face model"""
+    response = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message}
+        ],
+        max_tokens=max_tokens,
+    )
+    return response.choices[0].message["content"].strip()
+
+def handle_message(session_id: str, user_message: str, user=None) -> str:
+    """
+    Handle user message with Hugging Face model.
+    Replies in the same language (English or Kiswahili).
+    Falls back to mt5 if Kiswahili reply is broken.
+    """
+    system_prompt = (
+        "You are an agriculture assistant. "
+        "Reply in the same language the user uses (English or Kiswahili). "
+        "Do not mix languages. "
+        "Give short, clear, practical answers about farming (2–3 sentences max). "
+        "If asked greetings, reply briefly like a person. "
+        "If the question is not about agriculture, answer: "
+        "'Samahani, ninaweza kusaidia tu kuhusu masuala ya kilimo' "
+        "or 'Sorry, I can only help with agriculture questions'."
+    )
+
+    try:
+        # First attempt with Mistral
+        reply = ask_model(PRIMARY_MODEL, system_prompt, user_message)
+
+        # Check if reply is broken for Kiswahili
+        if is_mixed_language(user_message, reply):
+            # Retry with multilingual fallback model
+            reply = ask_model(FALLBACK_MODEL, system_prompt, user_message)
+
+        return reply
+
+    except Exception as e:
+        raise Exception(f"Hugging Face error: {str(e)}")
